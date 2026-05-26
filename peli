@@ -1,0 +1,128 @@
+import random
+
+def hand_value(hand):
+    total = 0
+    aces = 0
+
+    for card in hand:
+
+        if card in ["J", "Q", "K"]:
+            total += 10
+
+        elif card == "A":
+            total += 11
+            aces += 1
+
+        else:
+            total += int(card)
+
+    while total > 21 and aces > 0:
+        total -= 10
+        aces -= 1
+
+    return total
+
+
+bal = float(input("Starting balance: "))
+
+while bal > 0:
+
+    print("\nCurrent balance:", round(bal, 2))
+
+    while True:
+        bet = float(input("Bet: "))
+
+        if bet < 0.20:
+            print("Bet too small")
+
+        elif bet > bal:
+            print("Not enough funds")
+
+        else:
+            break
+
+    bal -= bet
+
+
+    cards = ["2", "3", "4", "5", "6", "7",
+             "8", "9", "10", "J", "Q", "K", "A"]
+
+    deck = cards * 4
+    random.shuffle(deck)
+
+    player_hand = []
+    dealer_hand = []
+
+    for _ in range(2):
+        player_hand.append(deck.pop())
+        dealer_hand.append(deck.pop())
+
+    busted = False
+    while True:
+
+        player_score = hand_value(player_hand)
+
+        print("\nPlayer:", player_hand)
+        print("Value:", player_score)
+
+        print("Dealer shows:", dealer_hand[0])
+
+        if player_score > 21:
+            print("Bust! You lose.")
+            busted = True
+            break
+
+        choice = input("Hit or stand? ").lower()
+
+        if choice == "hit":
+            player_hand.append(deck.pop())
+
+        elif choice == "stand":
+            break
+
+        else:
+            print("Invalid choice")
+
+    if not busted:
+
+        while hand_value(dealer_hand) < 17:
+            dealer_hand.append(deck.pop())
+
+        player_score = hand_value(player_hand)
+        dealer_score = hand_value(dealer_hand)
+
+        print("\n=== Final Results ===")
+        print("Player:", player_hand, "-", player_score)
+        print("Dealer:", dealer_hand, "-", dealer_score)
+
+        if dealer_score > 21:
+            print("Dealer busts! You win 🍀")
+            bal += bet * 2
+
+        elif player_score == 21 and len(player_hand) == 2:
+            print("Blackjack! 🍀")
+            bal += bet * 2.5
+
+        elif player_score > dealer_score:
+            print("You win 🍀")
+            bal += bet * 2
+
+        elif player_score < dealer_score:
+            print("You lose 😞")
+
+        else:
+            print("Push (tie)")
+            bal += bet
+
+    print("Balance:", round(bal, 2))
+
+    if bal <= 0:
+        print("You ran out of money!")
+        break
+
+    again = input("Play again? (yes/no): ")
+
+    if again != "yes":
+        break
+
+print("Game ended. Final balance:", round(bal, 2))
